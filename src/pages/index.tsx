@@ -1,54 +1,73 @@
-// Três formas de Consumir API dentro do React:
+/*Três formas de Consumir API dentro do React:
+  - SPA
+  - SSR
+  - SSG
+*/
 
-// import { useEffect } from "react"
+import { GetStaticProps } from 'next'; // Tipagem da função, ou seja, como é seu formato, seu retorno, seus parâmetros, etc.
 
-export default function Home(props) {
+import { format, parseISO} from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
-   
-  //1. SPA (funciona em qualquer projeto React)
+import { api } from '../services/api';
+import { convertDurationToTimeString } from '../utils/convertDurationToTimeString';
 
-  /*
-  useEffect(() => {
-    fetch('http://localhost:3333/episodes')
-      .then(response => response.json())
-      .then(data => console.log(data))
-  }, [])
-  */
+type Episode = {
+  id: string,
+  title: string, 
+  thumbnail: string,
+  members: string,
+  publishedAt: string,
+  duration: number,
+  durationAsString: string,
+  description: string,
+  url: string,
+}
 
-  console.log(props.episodes) // Dados foram carregados no Next.js e podem ser vistos no terminal onde o 'yarn dev' está sendo rodado. Para observar os dados no browser, adicionar <p>{JSON.stringify(props.episodes)}</p> no return da página.
+type HomeProps = {
+  episodes: Episode[] // ou Array<Episode>
+}
 
+export default function Home(props: HomeProps) {
   return (
     <>
       <h1> Index </h1>
+      <p>{JSON.stringify(props.episodes)}</p>
     </>
   )
 }
 
-// 2. SSR (funciona apenas para Next.js)
+// SSG 
+export const getStaticProps: GetStaticProps =  async () => {
+  //  const response = await api.get('/episodes?_limit=12&_sort=published_at&_order=desc'
 
-/*
-export async function getServerSideProps() {
-  const response = await fetch('http://localhost:3333/episodes')
-  const data = await response.json()
+  // const data = await response.data;
 
-  return {
-    props: {
-      episodes: data
+  const { data } = await api.get('episodes', {
+    params: {
+      _limit: 12,
+      _sort: 'published_at',
+      _order: 'desc'
     }
-  }
-}
-*/
+  })
 
-
-// 3. SSG (funciona apenas para Next.js)
-
-export async function getStaticProps() {
-  const response = await fetch('http://localhost:3333/episodes')
-  const data = await response.json()
+  const episodes = data.map(episode => {
+    return {
+      id: episode.id,
+      title: episode.title, 
+      thumbnail: episode.thumbnail,
+      members: episode.members,
+      publishedAt: format(parseISO(episode.published_at), 'd MMM yy', { locale: ptBR }),
+      duration: Number(episode.file.duration),
+      durationAsString: convertDurationToTimeString(Number(episode.file.duration)),
+      description: episode.description,
+      url: episode.file.url,
+    };
+  })
 
   return {
     props: {
-      episodes: data,
+      episodes,
     },
     revalidate:  60 * 60 * 8, // Número em segundos de quanto em quanto tempo eu quero gerar uma nova versão dessa página. Nesse caso, uma nova versão será gerada a cada 8h.
   }
