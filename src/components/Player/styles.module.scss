@@ -14,7 +14,7 @@
     header {
         display: flex;
         align-items: center;
-        gap: 1rem; // para flexbox ou grid: coloca um espaçamento entre os elementos que estão dentro do header, nesse caso
+        gap: 1rem; // Para flexbox ou grid: coloca um espaçamento entre os elementos que estão dentro do header, nesse caso
     }
 
     strong {
@@ -80,7 +80,7 @@
     button {
         background: transparent;
         border: 0;
-        font-size: 0; // resetar o tamanho da fonte do button que só possui uma imagem para que esta fique centralizada
+        font-size: 0; // Resetar o tamanho da fonte do button que só possui uma imagem para que esta fique centralizada
 
         &.playButton {
             width: 4rem;
