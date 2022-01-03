@@ -1,9 +1,17 @@
+/* eslint-disable @next/next/link-passhref */
+/* eslint-disable @next/next/no-img-element */
+
 import { format, parseISO } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
+
+import Image from "next/image";
+import Link from "next/link";
 import { GetStaticPaths, GetStaticProps } from "next";
 // import { useRouter } from "next/router"
 import { api } from "../../services/api";
 import { convertDurationToTimeString } from "../../utils/convertDurationToTimeString";
+
+import styles from "./episode.module.scss"
 
 type Episode = {
   id: string,
@@ -27,10 +35,43 @@ export default function Episode({ episode } : EpisodeProps) {
     return (
         //<h1>{router.query.slug}</h1>
 
-        <h1>{episode.title}</h1>
+        <div className={styles.episode}>
+            <div className={styles.thumbnailContainer}>
+                <Link href="/">
+                    <button type="button">
+                        <img src="/arrow-left.svg" alt="Voltar" />
+                    </button>
+                </Link>
+               
+                <Image
+                    width={700} 
+                    height={160} 
+                    src={episode.thumbnail} 
+                    alt={episode.title} 
+                    objectFit="cover"
+                />
+                <button type="button">
+                    <img src="/play.svg" alt="Tocar episódio" />
+                </button>
+            </div>
+
+            <header>
+                <h1>{episode.title}</h1>
+                <span>{episode.members}</span>
+                <span>{episode.publishedAt}</span>
+                <span>{episode.durationAsString}</span>
+            </header>
+
+            <div 
+                className={styles.description} 
+                dangerouslySetInnerHTML={{__html: episode.description}}
+            />
+        </div>
+        // dangerouslySetInnerHTML: É uma propriedade usada para forçar o React a converter e rendendizar o conteúdo em formato HTML.
     )
 }
 
+// Método para lidar com paginas estáticas e dinâmicas.
 export const getStaticPaths: GetStaticPaths = async () => {
     return {
         paths: [],
